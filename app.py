@@ -4,7 +4,7 @@ import csv
 import random
 import os
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+import openai
 import requests
 from urllib.parse import quote
 import json
@@ -14,12 +14,11 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Initialize Azure OpenAI client
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-)
+# Configure Azure OpenAI
+openai.api_type = "azure"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+openai.api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2023-05-15")
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-4")
 
@@ -62,8 +61,8 @@ For each similar bird, just provide the common name, one per line. Only provide 
 
 Similar birds to {bird_name}:"""
         
-        response = client.chat.completions.create(
-            model=DEPLOYMENT_NAME,
+        response = openai.ChatCompletion.create(
+            engine=DEPLOYMENT_NAME,
             messages=[
                 {"role": "system", "content": "You are an ornithology expert who knows bird identification well. When asked for similar birds, respond with only the common names, one per line, with no additional text, numbering, or formatting."},
                 {"role": "user", "content": message_text}
@@ -72,7 +71,7 @@ Similar birds to {bird_name}:"""
             max_tokens=150
         )
         
-        similar_birds = response.choices[0].message.content.strip().split('\n')
+        similar_birds = response['choices'][0]['message']['content'].strip().split('\n')
         similar_birds = [bird.strip() for bird in similar_birds if bird.strip()]
         return similar_birds[:num_similar]
     except Exception as e:
@@ -80,31 +79,81 @@ Similar birds to {bird_name}:"""
         return []
 
 
-def fetch_bird_images(bird_name, num_images=2):
-    """Fetch bird images from Bing Image Search."""
+def fetch_bird_images(bird_name, num_images=1):
+    """Fetch bird images from Wikimedia Commons."""
     try:
-        # Using Bing Image Search via direct URL (no API key required for basic usage)
-        search_url = f"https://www.bing.com/images/search?q={quote(bird_name + ' bird')}"
-        
-        # Alternative: Use a simple image search approach
-        # Try multiple image search endpoints
-        images = []
-        
-        # Try eBird photo search endpoint
-        try:
-            ebird_url = f"https://search.macaulaylibrary.org/api/v0/server?s={quote(bird_name)}&key=YOUR_EBIRD_KEY&media=p&limit=10"
-            # For now, we'll use a simpler approach
-        except:
-            pass
-        
-        # Use a simple Bing search approach - return search URL that can be used client-side
-        return {
-            "search_term": bird_name,
-            "search_url": search_url
+        # Headers with User-Agent to avoid 403
+        headers = {
+            'User-Agent': 'BirdIdentificationQuiz/1.0 (Student project)'
         }
+        
+        # Query Wikimedia Commons API for bird images
+        search_term = f"{bird_name}"
+        wiki_params = {
+            'action': 'query',
+            'list': 'search',
+            'srsearch': search_term,
+            'format': 'json',
+            'srnamespace': '6',  # File namespace
+            'srlimit': 20
+        }
+        
+        response = requests.get('https://commons.wikimedia.org/w/api.php', params=wiki_params, headers=headers, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        
+        images = []
+        if data.get('query', {}).get('search'):
+            for item in data['query']['search'][:num_images * 2]:  # Try more to filter
+                file_title = item['title']
+                # Skip non-image files
+                if not any(file_title.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
+                    continue
+                    
+                # Get file URL
+                file_params = {
+                    'action': 'query',
+                    'titles': file_title,
+                    'prop': 'imageinfo',
+                    'iiprop': 'url',
+                    'format': 'json'
+                }
+                file_response = requests.get('https://commons.wikimedia.org/w/api.php', params=file_params, headers=headers, timeout=5)
+                file_response.raise_for_status()
+                file_data = file_response.json()
+                
+                pages = file_data.get('query', {}).get('pages', {})
+                for page_id, page_info in pages.items():
+                    if 'imageinfo' in page_info:
+                        image_url = page_info['imageinfo'][0]['url']
+                        # Only use images that are reasonably sized
+                        if image_url and 'upload.wikimedia.org' in image_url:
+                            images.append(image_url)
+                        if len(images) >= num_images:
+                            break
+                if len(images) >= num_images:
+                    break
+        
+        if images:
+            return {
+                "image_url": images[0],
+                "search_term": bird_name,
+                "source": "Wikimedia Commons"
+            }
+        else:
+            # Fallback to search links if no images found
+            return {
+                "image_url": None,
+                "search_term": bird_name,
+                "search_url": f"https://commons.wikimedia.org/wiki/Category:{quote(bird_name)}"
+            }
     except Exception as e:
         print(f"Error fetching images: {e}")
-        return {"search_term": bird_name, "search_url": f"https://www.bing.com/images/search?q={quote(bird_name + ' bird')}"}
+        return {
+            "image_url": None,
+            "search_term": bird_name,
+            "search_url": f"https://commons.wikimedia.org/wiki/Special:Search?search={quote(bird_name)}"
+        }
 
 
 @app.route('/')

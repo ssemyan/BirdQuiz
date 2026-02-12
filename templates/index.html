@@ -348,11 +348,29 @@
         }
 
         function displayQuestion(question) {
+            // Display images
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
+            
+            if (question.images && question.images.image_url) {
+                const img = document.createElement('img');
+                img.src = question.images.image_url;
+                img.alt = question.correct_answer;
+                img.onerror = function() {
+                    // Fallback if image fails to load
+                    imageContainer.innerHTML = '<p style="color: #999;">Image could not be loaded. See search links below.</p>';
+                };
+                imageContainer.appendChild(img);
+            } else {
+                imageContainer.innerHTML = '<p style="color: #999;">Image not available. See search links below.</p>';
+            }
+
             // Display image search
             const imageSearch = document.getElementById('imageSearch');
             imageSearch.innerHTML = `
-                <a href="https://www.bing.com/images/search?q=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Search Bing Images</a>
-                <a href="https://ebird.org/species/${question.correct_answer.replace(/\s+/g, '')}" target="_blank">eBird.org</a>
+                <a href="https://commons.wikimedia.org/wiki/Special:Search?search=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Wikimedia</a>
+                <a href="https://www.bing.com/images/search?q=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Bing Images</a>
+                <a href="https://ebird.org/species/${question.correct_answer.replace(/\s+/g, '')}" target="_blank">eBird</a>
                 <a href="https://www.allaboutbirds.org/guide/search?q=${encodeURIComponent(question.correct_answer)}" target="_blank">All About Birds</a>
             `;
 
