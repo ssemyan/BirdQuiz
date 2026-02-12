@@ -106,7 +106,7 @@ def fetch_bird_images(bird_name, num_images=3):
             'srsearch': search_term,
             'format': 'json',
             'srnamespace': '6',  # File namespace
-            'srlimit': 20
+            'srlimit': 20  # Get more results to select from
         }
         
         response = requests.get('https://commons.wikimedia.org/w/api.php', params=wiki_params, headers=headers, timeout=5)
@@ -115,7 +115,7 @@ def fetch_bird_images(bird_name, num_images=3):
         
         images = []
         if data.get('query', {}).get('search'):
-            for item in data['query']['search'][:num_images * 3]:  # Try more to filter
+            for item in data['query']['search']:
                 file_title = item['title']
                 # Skip non-image files
                 if not any(file_title.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
@@ -140,14 +140,12 @@ def fetch_bird_images(bird_name, num_images=3):
                         # Only use images that are reasonably sized
                         if image_url and 'upload.wikimedia.org' in image_url:
                             images.append(image_url)
-                        if len(images) >= num_images:
-                            break
-                if len(images) >= num_images:
-                    break
         
         if images:
+            # Randomly select up to num_images from the collection
+            selected_images = random.sample(images, min(num_images, len(images)))
             return {
-                "image_urls": images,
+                "image_urls": selected_images,
                 "search_term": bird_name,
                 "source": "Wikimedia Commons"
             }

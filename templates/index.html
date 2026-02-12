@@ -244,6 +244,54 @@
         .loading.show {
             display: block;
         }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #ccc;
+        }
+
+        .image-container img {
+            cursor: pointer;
+        }
+
+        .image-container img:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -287,6 +335,12 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-content" alt="">
     </div>
 
     <script>
@@ -368,6 +422,9 @@
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.alt = question.correct_answer;
+                    img.onclick = function() {
+                        openImageModal(imageUrl);
+                    };
                     img.onerror = function() {
                         // If image fails to load, hide it
                         img.style.display = 'none';
@@ -482,6 +539,27 @@
                     .finally(() => showLoading(false));
             };
         });
+
+        // Modal functions
+        function openImageModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl;
+            modal.classList.add('show');
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside the image
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeImageModal();
+            }
+        };
     </script>
 </body>
 </html>
