@@ -18,7 +18,8 @@
         }
 
         .container {
-            max-width: 800px;
+            width: 80%;
+            max-width: 1400px;
             margin: 0 auto;
             background-color: white;
             padding: 30px;
@@ -97,14 +98,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 15px;
             background-color: #f0f0f0;
             border-radius: 5px;
+            padding: 15px;
+            flex-wrap: wrap;
         }
 
         .image-container img {
-            max-width: 100%;
-            max-height: 400px;
+            max-width: 30%;
+            max-height: 300px;
             border-radius: 5px;
+            object-fit: contain;
+            min-width: 200px;
         }
 
         .image-search {
@@ -130,6 +136,7 @@
         .options {
             margin-bottom: 30px;
             display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
 
@@ -140,8 +147,10 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            text-align: left;
+            text-align: center;
             transition: all 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .option-button:hover {
@@ -168,7 +177,8 @@
         }
 
         .feedback {
-            margin-bottom: 30px;
+            margin-top: 30px;
+            margin-bottom: 20px;
             padding: 15px;
             border-radius: 4px;
             display: none;
@@ -255,8 +265,6 @@
                 Incorrect: <span class="score-incorrect" id="incorrectCount">0</span>
             </div>
 
-            <div class="feedback" id="feedback"></div>
-
             <div class="image-container" id="imageContainer">
                 <p>Loading image...</p>
             </div>
@@ -268,6 +276,8 @@
             <div class="options" id="optionsContainer">
                 <!-- Options will be inserted here -->
             </div>
+
+            <div class="feedback" id="feedback"></div>
 
             <button class="next-button" id="nextButton" onclick="nextQuestion()">Next Question</button>
 
@@ -353,17 +363,24 @@
             const imageContainer = document.getElementById('imageContainer');
             imageContainer.innerHTML = '';
             
-            if (question.images && question.images.image_url) {
-                const img = document.createElement('img');
-                img.src = question.images.image_url;
-                img.alt = question.correct_answer;
-                img.onerror = function() {
-                    // Fallback if image fails to load
-                    imageContainer.innerHTML = '<p style="color: #999;">Image could not be loaded.</p>';
-                };
-                imageContainer.appendChild(img);
+            if (question.images && question.images.image_urls && question.images.image_urls.length > 0) {
+                question.images.image_urls.forEach(imageUrl => {
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = question.correct_answer;
+                    img.onerror = function() {
+                        // If image fails to load, hide it
+                        img.style.display = 'none';
+                    };
+                    imageContainer.appendChild(img);
+                });
+                
+                // If no images loaded, show message
+                if (imageContainer.children.length === 0) {
+                    imageContainer.innerHTML = '<p style="color: #999;">Images could not be loaded.</p>';
+                }
             } else {
-                imageContainer.innerHTML = '<p style="color: #999;">Image not available.</p>';
+                imageContainer.innerHTML = '<p style="color: #999;">Images not available.</p>';
             }
 
             // Display options

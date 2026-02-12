@@ -90,7 +90,7 @@ Similar birds to {bird_name}:"""
         return []
 
 
-def fetch_bird_images(bird_name, num_images=1):
+def fetch_bird_images(bird_name, num_images=3):
     """Fetch bird images from Wikimedia Commons."""
     try:
         # Headers with User-Agent to avoid 403
@@ -115,7 +115,7 @@ def fetch_bird_images(bird_name, num_images=1):
         
         images = []
         if data.get('query', {}).get('search'):
-            for item in data['query']['search'][:num_images * 2]:  # Try more to filter
+            for item in data['query']['search'][:num_images * 3]:  # Try more to filter
                 file_title = item['title']
                 # Skip non-image files
                 if not any(file_title.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
@@ -147,23 +147,23 @@ def fetch_bird_images(bird_name, num_images=1):
         
         if images:
             return {
-                "image_url": images[0],
+                "image_urls": images,
                 "search_term": bird_name,
                 "source": "Wikimedia Commons"
             }
         else:
-            # Fallback to search links if no images found
+            # Fallback if no images found
             return {
-                "image_url": None,
+                "image_urls": [],
                 "search_term": bird_name,
-                "search_url": f"https://commons.wikimedia.org/wiki/Category:{quote(bird_name)}"
+                "source": "Wikimedia Commons"
             }
     except Exception as e:
         print(f"Error fetching images: {e}")
         return {
-            "image_url": None,
+            "image_urls": [],
             "search_term": bird_name,
-            "search_url": f"https://commons.wikimedia.org/wiki/Special:Search?search={quote(bird_name)}"
+            "source": "Wikimedia Commons"
         }
 
 
