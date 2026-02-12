@@ -110,6 +110,7 @@
         .image-search {
             text-align: center;
             margin-bottom: 30px;
+            display: none;
         }
 
         .image-search a {
@@ -358,21 +359,12 @@
                 img.alt = question.correct_answer;
                 img.onerror = function() {
                     // Fallback if image fails to load
-                    imageContainer.innerHTML = '<p style="color: #999;">Image could not be loaded. See search links below.</p>';
+                    imageContainer.innerHTML = '<p style="color: #999;">Image could not be loaded.</p>';
                 };
                 imageContainer.appendChild(img);
             } else {
-                imageContainer.innerHTML = '<p style="color: #999;">Image not available. See search links below.</p>';
+                imageContainer.innerHTML = '<p style="color: #999;">Image not available.</p>';
             }
-
-            // Display image search
-            const imageSearch = document.getElementById('imageSearch');
-            imageSearch.innerHTML = `
-                <a href="https://commons.wikimedia.org/wiki/Special:Search?search=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Wikimedia</a>
-                <a href="https://www.bing.com/images/search?q=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Bing Images</a>
-                <a href="https://ebird.org/species/${question.correct_answer.replace(/\s+/g, '')}" target="_blank">eBird</a>
-                <a href="https://www.allaboutbirds.org/guide/search?q=${encodeURIComponent(question.correct_answer)}" target="_blank">All About Birds</a>
-            `;
 
             // Display options
             const optionsContainer = document.getElementById('optionsContainer');
