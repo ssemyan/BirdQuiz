@@ -1,4 +1,4 @@
-# Bird Identification Quiz
+# Bird Quiz
 
 A web-based bird identification practice application that tests your ability to identify birds you've seen. The app displays images of birds and presents 4 multiple-choice options (1 correct answer + 3 similar-looking birds), helping you reinforce your bird ID skills.
 
