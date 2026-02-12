@@ -1,7 +1,7 @@
 flask==3.0.0
 flask-cors==4.0.0
 python-dotenv==1.0.0
-openai
-azure-identity
+openai==2.20.0
+azure-identity==1.25.2
 requests==2.31.0
 pillow==10.0.0
