@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Identification Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .setup-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .setup-section input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .setup-section button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .setup-section button:hover {
+            background-color: #45a049;
+        }
+
+        .quiz-section {
+            display: none;
+        }
+
+        .score {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .score-correct {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .score-incorrect {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-bottom: 30px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 5px;
+        }
+
+        .image-search {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .image-search a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+        }
+
+        .image-search a:hover {
+            background-color: #0b7dda;
+        }
+
+        .options {
+            margin-bottom: 30px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-button {
+            padding: 15px;
+            background-color: #e0e0e0;
+            border: 2px solid #999;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #d0d0d0;
+            border-color: #666;
+        }
+
+        .option-button.selected {
+            background-color: #2196F3;
+            color: white;
+            border-color: #0b7dda;
+        }
+
+        .option-button.correct {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #45a049;
+        }
+
+        .option-button.incorrect {
+            background-color: #f44336;
+            color: white;
+            border-color: #da190b;
+        }
+
+        .feedback {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .next-button {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            display: none;
+        }
+
+        .next-button:hover {
+            background-color: #0b7dda;
+        }
+
+        .next-button.show {
+            display: block;
+        }
+
+        .error {
+            color: #f44336;
+            padding: 15px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐦 Bird Identification Quiz</h1>
+
+        <div class="setup-section" id="setupSection">
+            <label for="csvPath">CSV File Path:</label>
+            <input type="text" id="csvPath" value="ebird_world_year_list.csv" placeholder="e.g., ebird_world_year_list.csv">
+            <button onclick="loadCSV()">Load Birds</button>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+        <div class="loading" id="loading">Loading...</div>
+
+        <div class="quiz-section" id="quizSection">
+            <div class="score">
+                Correct: <span class="score-correct" id="correctCount">0</span> | 
+                Incorrect: <span class="score-incorrect" id="incorrectCount">0</span>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="image-container" id="imageContainer">
+                <p>Loading image...</p>
+            </div>
+
+            <div class="image-search" id="imageSearch">
+                <!-- Search links will be inserted here -->
+            </div>
+
+            <div class="options" id="optionsContainer">
+                <!-- Options will be inserted here -->
+            </div>
+
+            <button class="next-button" id="nextButton" onclick="nextQuestion()">Next Question</button>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="resetQuiz()" style="background-color: #ff9800; color: white; padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%;">
+                    Load Different CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let currentQuestion = null;
+        let answered = false;
+
+        async function loadCSV() {
+            const csvPath = document.getElementById('csvPath').value.trim();
+            
+            if (!csvPath) {
+                showError('Please enter a CSV file path');
+                return;
+            }
+
+            showLoading(true);
+            showError('');
+
+            try {
+                const response = await fetch('/api/load-csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_path: csvPath })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    correctCount = 0;
+                    incorrectCount = 0;
+                    document.getElementById('setupSection').style.display = 'none';
+                    document.getElementById('quizSection').style.display = 'block';
+                    nextQuestion();
+                } else {
+                    showError(data.error || 'Failed to load CSV');
+                }
+            } catch (error) {
+                showError('Error loading CSV: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function nextQuestion() {
+            answered = false;
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('nextButton').classList.remove('show');
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/quiz-question');
+                const data = await response.json();
+
+                if (data.success) {
+                    currentQuestion = data;
+                    displayQuestion(data);
+                } else {
+                    showError('Error loading question');
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayQuestion(question) {
+            // Display image search
+            const imageSearch = document.getElementById('imageSearch');
+            imageSearch.innerHTML = `
+                <a href="https://www.bing.com/images/search?q=${encodeURIComponent(question.correct_answer + ' bird')}" target="_blank">Search Bing Images</a>
+                <a href="https://ebird.org/species/${question.correct_answer.replace(/\s+/g, '')}" target="_blank">eBird.org</a>
+                <a href="https://www.allaboutbirds.org/guide/search?q=${encodeURIComponent(question.correct_answer)}" target="_blank">All About Birds</a>
+            `;
+
+            // Display options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => selectOption(button, option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(button, option) {
+            if (answered) return;
+
+            answered = true;
+
+            // Disable all buttons
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Check answer
+            const isCorrect = option.toLowerCase() === currentQuestion.correct_answer.toLowerCase();
+
+            if (isCorrect) {
+                correctCount++;
+                button.classList.add('correct');
+                document.getElementById('feedback').className = 'feedback correct';
+                document.getElementById('feedback').innerHTML = '✓ Correct!';
+            } else {
+                incorrectCount++;
+                button.classList.add('incorrect');
+                // Highlight correct answer
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    if (btn.textContent.toLowerCase() === currentQuestion.correct_answer.toLowerCase()) {
+                        btn.classList.add('correct');
+                    }
+                });
+                document.getElementById('feedback').className = 'feedback incorrect';
+                document.getElementById('feedback').innerHTML = `✗ Incorrect! The correct answer is: ${currentQuestion.correct_answer}`;
+            }
+
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('incorrectCount').textContent = incorrectCount;
+            document.getElementById('nextButton').classList.add('show');
+        }
+
+        function resetQuiz() {
+            document.getElementById('setupSection').style.display = 'block';
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('csvPath').value = 'ebird_world_year_list.csv';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            if (message) {
+                errorDiv.textContent = message;
+                errorDiv.classList.add('show');
+            } else {
+                errorDiv.classList.remove('show');
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            // Check if default CSV exists
+            nextQuestion = () => {
+                answered = false;
+                document.getElementById('feedback').className = 'feedback';
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('nextButton').classList.remove('show');
+
+                showLoading(true);
+
+                fetch('/api/quiz-question')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            currentQuestion = data;
+                            displayQuestion(data);
+                        } else {
+                            showError('Error loading question');
+                        }
+                    })
+                    .catch(error => showError('Error: ' + error.message))
+                    .finally(() => showLoading(false));
+            };
+        });
+    </script>
+</body>
+</html>
