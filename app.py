@@ -4,7 +4,8 @@ import csv
 import random
 import os
 from dotenv import load_dotenv
-import openai
+from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import requests
 from urllib.parse import quote
 import json
@@ -14,13 +15,17 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Configure Azure OpenAI
-openai.api_type = "azure"
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-openai.api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2023-05-15")
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+# Configure Azure OpenAI with Azure AD authentication
+credential = DefaultAzureCredential()
+token_provider = get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default")
 
-DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-4")
+client = AzureOpenAI(
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    azure_ad_token_provider=token_provider
+)
+
+DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 
 # Store bird list in memory
 bird_list = []
@@ -61,8 +66,8 @@ For each similar bird, just provide the common name, one per line. Only provide 
 
 Similar birds to {bird_name}:"""
         
-        response = openai.ChatCompletion.create(
-            engine=DEPLOYMENT_NAME,
+        response = client.chat.completions.create(
+            model=DEPLOYMENT_NAME,
             messages=[
                 {"role": "system", "content": "You are an ornithology expert who knows bird identification well. When asked for similar birds, respond with only the common names, one per line, with no additional text, numbering, or formatting."},
                 {"role": "user", "content": message_text}
@@ -71,11 +76,17 @@ Similar birds to {bird_name}:"""
             max_tokens=150
         )
         
-        similar_birds = response['choices'][0]['message']['content'].strip().split('\n')
+        response_text = response.choices[0].message.content.strip()
+        print(f"[OpenAI Response for '{bird_name}']: {response_text}")
+        
+        similar_birds = response_text.split('\n')
         similar_birds = [bird.strip() for bird in similar_birds if bird.strip()]
         return similar_birds[:num_similar]
     except Exception as e:
         print(f"Error getting similar birds: {e}")
+        print(f"  - API Key set: {bool(os.getenv('AZURE_OPENAI_API_KEY'))}")
+        print(f"  - API Base: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
+        print(f"  - Deployment: {DEPLOYMENT_NAME}")
         return []
 
 
@@ -187,6 +198,7 @@ def get_quiz_question():
     
     # Pick a random bird
     correct_bird = random.choice(bird_list)
+    print(f"\n[Quiz Question] Showing bird: {correct_bird}")
     
     # Get similar birds
     similar_birds = get_similar_birds(correct_bird, num_similar=3)
