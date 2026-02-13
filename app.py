@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 import csv
 import random
 import os
@@ -7,13 +6,10 @@ from dotenv import load_dotenv
 from openai import AzureOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import requests
-from urllib.parse import quote
-import json
 
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
 
 # Configure Azure OpenAI with Azure AD authentication
 credential = DefaultAzureCredential()
@@ -34,24 +30,15 @@ bird_list = []
 def load_birds_from_csv(file_path):
     """Load bird names from CSV file."""
     global bird_list
-    birds = []
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             if reader.fieldnames is None or 'Common Name' not in reader.fieldnames:
                 return None
-            for row in reader:
-                if row['Common Name'].strip():
-                    birds.append(row['Common Name'].strip())
+            birds = [row['Common Name'].strip() for row in reader if row['Common Name'].strip()]
         # Remove duplicates while preserving order
-        seen = set()
-        unique_birds = []
-        for bird in birds:
-            if bird not in seen:
-                seen.add(bird)
-                unique_birds.append(bird)
-        bird_list = unique_birds
-        return unique_birds
+        bird_list = list(dict.fromkeys(birds))
+        return bird_list
     except Exception as e:
         print(f"Error loading CSV: {e}")
         return None
@@ -84,85 +71,82 @@ Similar birds to {bird_name}:"""
         return similar_birds[:num_similar]
     except Exception as e:
         print(f"Error getting similar birds: {e}")
-        print(f"  - API Key set: {bool(os.getenv('AZURE_OPENAI_API_KEY'))}")
-        print(f"  - API Base: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
+        print(f"  - Endpoint: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
         print(f"  - Deployment: {DEPLOYMENT_NAME}")
         return []
 
 
 def fetch_bird_images(bird_name, num_images=3):
     """Fetch bird images from Wikimedia Commons."""
+    empty_result = {
+        "image_urls": [],
+        "search_term": bird_name,
+        "source": "Wikimedia Commons"
+    }
     try:
-        # Headers with User-Agent to avoid 403
         headers = {
             'User-Agent': 'BirdIdentificationQuiz/1.0 (Student project)'
         }
         
         # Query Wikimedia Commons API for bird images
-        search_term = f"{bird_name}"
         wiki_params = {
             'action': 'query',
             'list': 'search',
-            'srsearch': search_term,
+            'srsearch': bird_name,
             'format': 'json',
             'srnamespace': '6',  # File namespace
-            'srlimit': 20  # Get more results to select from
+            'srlimit': 20
         }
         
         response = requests.get('https://commons.wikimedia.org/w/api.php', params=wiki_params, headers=headers, timeout=5)
         response.raise_for_status()
         data = response.json()
         
-        images = []
-        if data.get('query', {}).get('search'):
-            for item in data['query']['search']:
-                file_title = item['title']
-                # Skip non-image files
-                if not any(file_title.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
-                    continue
-                    
-                # Get file URL
-                file_params = {
-                    'action': 'query',
-                    'titles': file_title,
-                    'prop': 'imageinfo',
-                    'iiprop': 'url',
-                    'format': 'json'
-                }
-                file_response = requests.get('https://commons.wikimedia.org/w/api.php', params=file_params, headers=headers, timeout=5)
-                file_response.raise_for_status()
-                file_data = file_response.json()
-                
-                pages = file_data.get('query', {}).get('pages', {})
-                for page_id, page_info in pages.items():
-                    if 'imageinfo' in page_info:
-                        image_url = page_info['imageinfo'][0]['url']
-                        # Only use images that are reasonably sized
-                        if image_url and 'upload.wikimedia.org' in image_url:
-                            images.append(image_url)
+        search_results = data.get('query', {}).get('search', [])
+        if not search_results:
+            return empty_result
         
-        if images:
-            # Randomly select up to num_images from the collection
-            selected_images = random.sample(images, min(num_images, len(images)))
-            return {
-                "image_urls": selected_images,
-                "search_term": bird_name,
-                "source": "Wikimedia Commons"
-            }
-        else:
-            # Fallback if no images found
-            return {
-                "image_urls": [],
-                "search_term": bird_name,
-                "source": "Wikimedia Commons"
-            }
-    except Exception as e:
-        print(f"Error fetching images: {e}")
+        # Filter to image files only
+        image_extensions = ('.jpg', '.jpeg', '.png', '.gif', '.webp')
+        file_titles = [
+            item['title'] for item in search_results
+            if any(item['title'].lower().endswith(ext) for ext in image_extensions)
+        ]
+        
+        if not file_titles:
+            return empty_result
+        
+        # Batch request: get URLs for all matching files at once
+        file_params = {
+            'action': 'query',
+            'titles': '|'.join(file_titles),
+            'prop': 'imageinfo',
+            'iiprop': 'url',
+            'format': 'json'
+        }
+        file_response = requests.get('https://commons.wikimedia.org/w/api.php', params=file_params, headers=headers, timeout=5)
+        file_response.raise_for_status()
+        file_data = file_response.json()
+        
+        images = []
+        for page_info in file_data.get('query', {}).get('pages', {}).values():
+            if 'imageinfo' in page_info:
+                image_url = page_info['imageinfo'][0]['url']
+                if image_url and 'upload.wikimedia.org' in image_url:
+                    images.append(image_url)
+        
+        if not images:
+            return empty_result
+        
+        selected_images = random.sample(images, min(num_images, len(images)))
         return {
-            "image_urls": [],
+            "image_urls": selected_images,
             "search_term": bird_name,
             "source": "Wikimedia Commons"
         }
+    except Exception as e:
+        print(f"Error fetching images: {e}")
+        return empty_result
 
 
 @app.route('/')
@@ -222,22 +206,6 @@ def get_quiz_question():
         'correct_answer': correct_bird,
         'options': options,
         'images': images
-    })
-
-
-@app.route('/api/check-answer', methods=['POST'])
-def check_answer():
-    """Check if the user's answer is correct."""
-    data = request.json
-    user_answer = data.get('answer', '').strip()
-    correct_answer = data.get('correct_answer', '').strip()
-    
-    is_correct = user_answer.lower() == correct_answer.lower()
-    
-    return jsonify({
-        'success': True,
-        'is_correct': is_correct,
-        'correct_answer': correct_answer
     })
 
 
