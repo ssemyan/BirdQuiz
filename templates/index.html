@@ -14,7 +14,7 @@
             <button class="menu-button" id="menuButton" onclick="toggleMenu()">☰</button>
             
             <div class="menu" id="menu">
-                <button class="menu-item" onclick="resetQuiz()">Load Different CSV</button>
+                <button class="menu-item" onclick="resetQuiz()">Load Different Birds</button>
             </div>
         </div>
 
@@ -23,11 +23,12 @@
                 <button class="quick-start-button" onclick="loadWashingtonBirds()">Washington Birds</button>
                 <button class="quick-start-button" onclick="loadBackyardBirds()">Common Backyard Birds</button>
                 <button class="quick-start-button" onclick="loadWaterfowl()">Waterfowl</button>
+                <button class="quick-start-button custom-button" onclick="showCustomCSV()">Custom</button>
             </div>
-            <div class="custom-csv">
-                <label for="csvPath">CSV File Path:</label>
-                <input type="text" id="csvPath" value="ebird_world_year_list.csv" placeholder="e.g., ebird_world_year_list.csv">
-                <button onclick="loadCSV()">Load Birds</button>
+            <div class="custom-csv" id="customCsvSection" style="display: none;">
+                <label for="csvData">Paste your list of bird names, one per line:</label>
+                <textarea id="csvData" rows="6" placeholder="American Robin&#10;Bald Eagle&#10;Red-tailed Hawk&#10;..."></textarea>
+                <button onclick="loadCustomCSV()">Load Birds</button>
             </div>
         </div>
 

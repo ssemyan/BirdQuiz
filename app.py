@@ -172,6 +172,27 @@ def load_csv():
     return jsonify({'success': True, 'count': len(birds)})
 
 
+@app.route('/api/load-csv-data', methods=['POST'])
+def load_csv_data():
+    """Load birds from a pasted list of names, one per line."""
+    data = request.json
+    bird_names = data.get('bird_names', '')
+    
+    if not bird_names.strip():
+        return jsonify({'success': False, 'error': 'No bird names provided'}), 400
+    
+    global bird_list
+    try:
+        birds = [name.strip() for name in bird_names.splitlines() if name.strip()]
+        bird_list = list(dict.fromkeys(birds))
+        if not bird_list:
+            return jsonify({'success': False, 'error': 'No bird names found in the list'}), 400
+        return jsonify({'success': True, 'count': len(bird_list)})
+    except Exception as e:
+        print(f"Error parsing bird list: {e}")
+        return jsonify({'success': False, 'error': 'Failed to parse bird list'}), 400
+
+
 @app.route('/api/quiz-question', methods=['GET'])
 def get_quiz_question():
     """Generate a quiz question with random bird and options."""

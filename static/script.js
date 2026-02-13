@@ -7,10 +7,11 @@ const setupSection = document.getElementById('setupSection');
 const quizSection = document.getElementById('quizSection');
 const menuButton = document.getElementById('menuButton');
 const errorDiv = document.getElementById('errorMessage');
-const csvPathInput = document.getElementById('csvPath');
+const csvDataInput = document.getElementById('csvData');
 const correctCountEl = document.getElementById('correctCount');
 const incorrectCountEl = document.getElementById('incorrectCount');
 const quizTitle = document.getElementById('quizTitle');
+const customCsvSection = document.getElementById('customCsvSection');
 
 let correctCount = 0;
 let incorrectCount = 0;
@@ -18,32 +19,26 @@ let currentQuestion = null;
 let answered = false;
 let quizLabel = null;
 
+function showCustomCSV() {
+    customCsvSection.style.display = customCsvSection.style.display === 'none' ? 'block' : 'none';
+}
+
 function loadWashingtonBirds() {
-    csvPathInput.value = 'wa_birds.csv';
     quizLabel = 'Washington Birds';
-    loadCSV();
+    loadCSV('wa_birds.csv');
 }
 
 function loadBackyardBirds() {
-    csvPathInput.value = 'backyard_birds.csv';
     quizLabel = 'Common Backyard Birds';
-    loadCSV();
+    loadCSV('backyard_birds.csv');
 }
 
 function loadWaterfowl() {
-    csvPathInput.value = 'waterfowl.csv';
     quizLabel = 'Waterfowl';
-    loadCSV();
+    loadCSV('waterfowl.csv');
 }
 
-async function loadCSV() {
-    const csvPath = csvPathInput.value.trim();
-    
-    if (!csvPath) {
-        showError('Please enter a CSV file path');
-        return;
-    }
-
+async function loadCSV(filePath) {
     showError('');
 
     try {
@@ -52,26 +47,62 @@ async function loadCSV() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ file_path: csvPath })
+            body: JSON.stringify({ file_path: filePath })
         });
 
         const data = await response.json();
 
         if (data.success) {
-            correctCount = 0;
-            incorrectCount = 0;
-            quizTitle.textContent = '🐦 Bird Quiz - ' + (quizLabel || 'Custom');
-            quizLabel = null;
-            setupSection.style.display = 'none';
-            quizSection.style.display = 'block';
-            menuButton.classList.add('show');
-            nextQuestion();
+            startQuiz();
         } else {
             showError(data.error || 'Failed to load CSV');
         }
     } catch (error) {
         showError('Error loading CSV: ' + error.message);
     }
+}
+
+async function loadCustomCSV() {
+    const csvData = csvDataInput.value.trim();
+
+    if (!csvData) {
+        showError('Please paste a list of bird names into the text box');
+        return;
+    }
+
+    showError('');
+    quizLabel = 'Custom';
+
+    try {
+        const response = await fetch('/api/load-csv-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bird_names: csvData })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            startQuiz();
+        } else {
+            showError(data.error || 'Failed to load bird list');
+        }
+    } catch (error) {
+        showError('Error loading bird list: ' + error.message);
+    }
+}
+
+function startQuiz() {
+    correctCount = 0;
+    incorrectCount = 0;
+    quizTitle.textContent = '🐦 Bird Quiz - ' + (quizLabel || 'Custom');
+    quizLabel = null;
+    setupSection.style.display = 'none';
+    quizSection.style.display = 'block';
+    menuButton.classList.add('show');
+    nextQuestion();
 }
 
 async function nextQuestion() {
@@ -178,8 +209,9 @@ function selectOption(button, option) {
 function resetQuiz() {
     setupSection.style.display = 'block';
     quizSection.style.display = 'none';
-    csvPathInput.value = 'ebird_world_year_list.csv';
-    quizTitle.textContent = '🐦 Bird Identification Quiz';
+    csvDataInput.value = '';
+    customCsvSection.style.display = 'none';
+    quizTitle.textContent = '🐦 Bird Quiz';
     menuButton.classList.remove('show');
     closeMenu();
 }

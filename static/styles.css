@@ -62,19 +62,29 @@ h1 {
     background-color: #1976D2;
 }
 
+.quick-start-button.custom-button {
+    background-color: #FF9800;
+}
+
+.quick-start-button.custom-button:hover {
+    background-color: #F57C00;
+}
+
 .custom-csv label {
     display: block;
     margin-bottom: 10px;
     font-weight: bold;
 }
 
-.custom-csv input[type="text"] {
+.custom-csv textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    font-family: monospace;
+    resize: vertical;
 }
 
 .setup-section .custom-csv button {
