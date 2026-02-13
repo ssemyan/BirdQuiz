@@ -1,17 +1,29 @@
+// Cache DOM element references
+const feedbackEl = document.getElementById('feedback');
+const imageContainer = document.getElementById('imageContainer');
+const optionsContainer = document.getElementById('optionsContainer');
+const nextButton = document.getElementById('nextButton');
+const setupSection = document.getElementById('setupSection');
+const quizSection = document.getElementById('quizSection');
+const menuButton = document.getElementById('menuButton');
+const errorDiv = document.getElementById('errorMessage');
+const csvPathInput = document.getElementById('csvPath');
+const correctCountEl = document.getElementById('correctCount');
+const incorrectCountEl = document.getElementById('incorrectCount');
+
 let correctCount = 0;
 let incorrectCount = 0;
 let currentQuestion = null;
 let answered = false;
 
 async function loadCSV() {
-    const csvPath = document.getElementById('csvPath').value.trim();
+    const csvPath = csvPathInput.value.trim();
     
     if (!csvPath) {
         showError('Please enter a CSV file path');
         return;
     }
 
-    showLoading(true);
     showError('');
 
     try {
@@ -28,31 +40,29 @@ async function loadCSV() {
         if (data.success) {
             correctCount = 0;
             incorrectCount = 0;
-            document.getElementById('setupSection').style.display = 'none';
-            document.getElementById('quizSection').style.display = 'block';
-            document.getElementById('menuButton').classList.add('show');
+            setupSection.style.display = 'none';
+            quizSection.style.display = 'block';
+            menuButton.classList.add('show');
             nextQuestion();
         } else {
             showError(data.error || 'Failed to load CSV');
         }
     } catch (error) {
         showError('Error loading CSV: ' + error.message);
-    } finally {
-        showLoading(false);
     }
 }
 
 async function nextQuestion() {
     answered = false;
-    document.getElementById('feedback').className = 'feedback';
-    document.getElementById('feedback').innerHTML = '';
-    document.getElementById('nextButton').classList.remove('show');
+    feedbackEl.className = 'feedback';
+    feedbackEl.innerHTML = '';
+    nextButton.classList.remove('show');
 
     // Clear images and show loading text
-    document.getElementById('imageContainer').innerHTML = '<p>Loading images...</p>';
+    imageContainer.innerHTML = '<p>Loading images...</p>';
     
     // Clear options
-    document.getElementById('optionsContainer').innerHTML = '';
+    optionsContainer.innerHTML = '';
 
     try {
         const response = await fetch('/api/quiz-question');
@@ -71,7 +81,6 @@ async function nextQuestion() {
 
 function displayQuestion(question) {
     // Display images
-    const imageContainer = document.getElementById('imageContainer');
     imageContainer.innerHTML = '';
     
     if (question.images && question.images.image_urls && question.images.image_urls.length > 0) {
@@ -83,22 +92,19 @@ function displayQuestion(question) {
                 openImageModal(imageUrl);
             };
             img.onerror = function() {
-                // If image fails to load, hide it
                 img.style.display = 'none';
             };
             imageContainer.appendChild(img);
         });
         
-        // If no images loaded, show message
         if (imageContainer.children.length === 0) {
-            imageContainer.innerHTML = '<p style="color: #999;">Images could not be loaded.</p>';
+            imageContainer.innerHTML = '<p class="no-images">Images could not be loaded.</p>';
         }
     } else {
-        imageContainer.innerHTML = '<p style="color: #999;">Images not available.</p>';
+        imageContainer.innerHTML = '<p class="no-images">Images not available.</p>';
     }
 
     // Display options
-    const optionsContainer = document.getElementById('optionsContainer');
     optionsContainer.innerHTML = '';
 
     question.options.forEach(option => {
@@ -126,8 +132,8 @@ function selectOption(button, option) {
     if (isCorrect) {
         correctCount++;
         button.classList.add('correct');
-        document.getElementById('feedback').className = 'feedback correct';
-        document.getElementById('feedback').innerHTML = '✓ Correct!';
+        feedbackEl.className = 'feedback correct';
+        feedbackEl.innerHTML = '✓ Correct!';
     } else {
         incorrectCount++;
         button.classList.add('incorrect');
@@ -137,39 +143,32 @@ function selectOption(button, option) {
                 btn.classList.add('correct');
             }
         });
-        document.getElementById('feedback').className = 'feedback incorrect';
-        document.getElementById('feedback').innerHTML = `✗ Incorrect! The correct answer is: ${currentQuestion.correct_answer}`;
+        feedbackEl.className = 'feedback incorrect';
+        feedbackEl.innerHTML = `✗ Incorrect! The correct answer is: ${currentQuestion.correct_answer}`;
     }
 
-    document.getElementById('correctCount').textContent = correctCount;
-    document.getElementById('incorrectCount').textContent = incorrectCount;
-    document.getElementById('nextButton').classList.add('show');
+    correctCountEl.textContent = correctCount;
+    incorrectCountEl.textContent = incorrectCount;
+    nextButton.classList.add('show');
 }
 
 function resetQuiz() {
-    document.getElementById('setupSection').style.display = 'block';
-    document.getElementById('quizSection').style.display = 'none';
-    document.getElementById('csvPath').value = 'ebird_world_year_list.csv';
-    document.getElementById('menuButton').classList.remove('show');
+    setupSection.style.display = 'block';
+    quizSection.style.display = 'none';
+    csvPathInput.value = 'ebird_world_year_list.csv';
+    menuButton.classList.remove('show');
     closeMenu();
 }
 
 function toggleMenu() {
-    const menu = document.getElementById('menu');
-    menu.classList.toggle('show');
+    document.getElementById('menu').classList.toggle('show');
 }
 
 function closeMenu() {
-    const menu = document.getElementById('menu');
-    menu.classList.remove('show');
-}
-
-function loadDifferentCSV() {
-    resetQuiz();
+    document.getElementById('menu').classList.remove('show');
 }
 
 function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
     if (message) {
         errorDiv.textContent = message;
         errorDiv.classList.add('show');
@@ -177,44 +176,6 @@ function showError(message) {
         errorDiv.classList.remove('show');
     }
 }
-
-function showLoading(show) {
-    const loading = document.getElementById('loading');
-    if (show) {
-        loading.classList.add('show');
-    } else {
-        loading.classList.remove('show');
-    }
-}
-
-// Initialize
-window.addEventListener('load', () => {
-    // Check if default CSV exists
-    nextQuestion = () => {
-        answered = false;
-        document.getElementById('feedback').className = 'feedback';
-        document.getElementById('feedback').innerHTML = '';
-        document.getElementById('nextButton').classList.remove('show');
-
-        // Clear images and show loading text
-        document.getElementById('imageContainer').innerHTML = '<p>Loading images...</p>';
-        
-        // Clear options
-        document.getElementById('optionsContainer').innerHTML = '';
-
-        fetch('/api/quiz-question')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentQuestion = data;
-                    displayQuestion(data);
-                } else {
-                    showError('Error loading question');
-                }
-            })
-            .catch(error => showError('Error: ' + error.message));
-    };
-});
 
 // Modal functions
 function openImageModal(imageUrl) {
@@ -225,21 +186,19 @@ function openImageModal(imageUrl) {
 }
 
 function closeImageModal() {
-    const modal = document.getElementById('imageModal');
-    modal.classList.remove('show');
+    document.getElementById('imageModal').classList.remove('show');
 }
 
-// Close modal when clicking outside the image
-// Also close menu when clicking outside
+// Close modal and menu when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('imageModal');
     if (event.target === modal) {
         closeImageModal();
     }
 
-    const menuButton = document.getElementById('menuButton');
+    const menuBtn = document.getElementById('menuButton');
     const menu = document.getElementById('menu');
-    if (event.target !== menuButton && event.target !== menu && !menu.contains(event.target)) {
+    if (event.target !== menuBtn && event.target !== menu && !menu.contains(event.target)) {
         closeMenu();
     }
 };

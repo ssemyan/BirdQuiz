@@ -8,12 +8,12 @@
 </head>
 <body>
     <div class="container">
-        <div style="position: relative;">
+        <div class="header">
             <h1>🐦 Bird Identification Quiz</h1>
             <button class="menu-button" id="menuButton" onclick="toggleMenu()">☰</button>
             
             <div class="menu" id="menu">
-                <button class="menu-item" onclick="loadDifferentCSV()">Load Different CSV</button>
+                <button class="menu-item" onclick="resetQuiz()">Load Different CSV</button>
             </div>
         </div>
 
@@ -24,7 +24,6 @@
         </div>
 
         <div class="error" id="errorMessage"></div>
-        <div class="loading" id="loading">Loading...</div>
 
         <div class="quiz-section" id="quizSection">
             <div class="score">
@@ -34,10 +33,6 @@
 
             <div class="image-container" id="imageContainer">
                 <p>Loading images...</p>
-            </div>
-
-            <div class="image-search" id="imageSearch">
-                <!-- Search links will be inserted here -->
             </div>
 
             <div class="options" id="optionsContainer">
