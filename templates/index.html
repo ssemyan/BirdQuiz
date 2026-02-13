@@ -4,299 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bird Identification Quiz</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            width: 80%;
-            max-width: 1400px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .setup-section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-
-        .setup-section label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .setup-section input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .setup-section button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        .setup-section button:hover {
-            background-color: #45a049;
-        }
-
-        .quiz-section {
-            display: none;
-        }
-
-        .score {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .score-correct {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .score-incorrect {
-            color: #f44336;
-            font-weight: bold;
-        }
-
-        .image-container {
-            text-align: center;
-            margin-bottom: 30px;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            padding: 15px;
-            flex-wrap: wrap;
-        }
-
-        .image-container img {
-            max-width: 30%;
-            max-height: 300px;
-            border-radius: 5px;
-            object-fit: contain;
-            min-width: 200px;
-        }
-
-        .image-search {
-            text-align: center;
-            margin-bottom: 30px;
-            display: none;
-        }
-
-        .image-search a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            margin: 5px;
-        }
-
-        .image-search a:hover {
-            background-color: #0b7dda;
-        }
-
-        .options {
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .option-button {
-            padding: 15px;
-            background-color: #e0e0e0;
-            border: 2px solid #999;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-            transition: all 0.3s;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        .option-button:hover {
-            background-color: #d0d0d0;
-            border-color: #666;
-        }
-
-        .option-button.selected {
-            background-color: #2196F3;
-            color: white;
-            border-color: #0b7dda;
-        }
-
-        .option-button.correct {
-            background-color: #4CAF50;
-            color: white;
-            border-color: #45a049;
-        }
-
-        .option-button.incorrect {
-            background-color: #f44336;
-            color: white;
-            border-color: #da190b;
-        }
-
-        .feedback {
-            margin-top: 30px;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 4px;
-            display: none;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .feedback.correct {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        .feedback.incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-
-        .next-button {
-            background-color: #2196F3;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            display: none;
-        }
-
-        .next-button:hover {
-            background-color: #0b7dda;
-        }
-
-        .next-button.show {
-            display: block;
-        }
-
-        .error {
-            color: #f44336;
-            padding: 15px;
-            background-color: #f8d7da;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error.show {
-            display: block;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            display: none;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-close:hover {
-            color: #ccc;
-        }
-
-        .image-container img {
-            cursor: pointer;
-        }
-
-        .image-container img:hover {
-            opacity: 0.8;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>🐦 Bird Identification Quiz</h1>
+        <div style="position: relative;">
+            <h1>🐦 Bird Identification Quiz</h1>
+            <button class="menu-button" id="menuButton" onclick="toggleMenu()">☰</button>
+            
+            <div class="menu" id="menu">
+                <button class="menu-item" onclick="loadDifferentCSV()">Load Different CSV</button>
+            </div>
+        </div>
 
         <div class="setup-section" id="setupSection">
             <label for="csvPath">CSV File Path:</label>
@@ -328,12 +47,6 @@
             <div class="feedback" id="feedback"></div>
 
             <button class="next-button" id="nextButton" onclick="nextQuestion()">Next Question</button>
-
-            <div style="margin-top: 20px; text-align: center;">
-                <button onclick="resetQuiz()" style="background-color: #ff9800; color: white; padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%;">
-                    Load Different CSV
-                </button>
-            </div>
         </div>
     </div>
 
@@ -376,6 +89,7 @@
                     incorrectCount = 0;
                     document.getElementById('setupSection').style.display = 'none';
                     document.getElementById('quizSection').style.display = 'block';
+                    document.getElementById('menuButton').classList.add('show');
                     nextQuestion();
                 } else {
                     showError(data.error || 'Failed to load CSV');
@@ -495,6 +209,22 @@
             document.getElementById('setupSection').style.display = 'block';
             document.getElementById('quizSection').style.display = 'none';
             document.getElementById('csvPath').value = 'ebird_world_year_list.csv';
+            document.getElementById('menuButton').classList.remove('show');
+            closeMenu();
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            menu.classList.toggle('show');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('menu');
+            menu.classList.remove('show');
+        }
+
+        function loadDifferentCSV() {
+            resetQuiz();
         }
 
         function showError(message) {
@@ -559,10 +289,17 @@
         }
 
         // Close modal when clicking outside the image
+        // Also close menu when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('imageModal');
             if (event.target === modal) {
                 closeImageModal();
+            }
+
+            const menuButton = document.getElementById('menuButton');
+            const menu = document.getElementById('menu');
+            if (event.target !== menuButton && event.target !== menu && !menu.contains(event.target)) {
+                closeMenu();
             }
         };
     </script>
