@@ -314,7 +314,7 @@
             </div>
 
             <div class="image-container" id="imageContainer">
-                <p>Loading image...</p>
+                <p>Loading images...</p>
             </div>
 
             <div class="image-search" id="imageSearch">
@@ -393,7 +393,11 @@
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('nextButton').classList.remove('show');
 
-            showLoading(true);
+            // Clear images and show loading text
+            document.getElementById('imageContainer').innerHTML = '<p>Loading images...</p>';
+            
+            // Clear options
+            document.getElementById('optionsContainer').innerHTML = '';
 
             try {
                 const response = await fetch('/api/quiz-question');
@@ -407,8 +411,6 @@
                 }
             } catch (error) {
                 showError('Error: ' + error.message);
-            } finally {
-                showLoading(false);
             }
         }
 
@@ -523,7 +525,11 @@
                 document.getElementById('feedback').innerHTML = '';
                 document.getElementById('nextButton').classList.remove('show');
 
-                showLoading(true);
+                // Clear images and show loading text
+                document.getElementById('imageContainer').innerHTML = '<p>Loading images...</p>';
+                
+                // Clear options
+                document.getElementById('optionsContainer').innerHTML = '';
 
                 fetch('/api/quiz-question')
                     .then(response => response.json())
@@ -535,8 +541,7 @@
                             showError('Error loading question');
                         }
                     })
-                    .catch(error => showError('Error: ' + error.message))
-                    .finally(() => showLoading(false));
+                    .catch(error => showError('Error: ' + error.message));
             };
         });
 
