@@ -10,11 +10,25 @@ const errorDiv = document.getElementById('errorMessage');
 const csvPathInput = document.getElementById('csvPath');
 const correctCountEl = document.getElementById('correctCount');
 const incorrectCountEl = document.getElementById('incorrectCount');
+const quizTitle = document.getElementById('quizTitle');
 
 let correctCount = 0;
 let incorrectCount = 0;
 let currentQuestion = null;
 let answered = false;
+let quizLabel = null;
+
+function loadWashingtonBirds() {
+    csvPathInput.value = 'wa_birds.csv';
+    quizLabel = 'Washington Birds';
+    loadCSV();
+}
+
+function loadBackyardBirds() {
+    csvPathInput.value = 'backyard_birds.csv';
+    quizLabel = 'Common Backyard Birds';
+    loadCSV();
+}
 
 async function loadCSV() {
     const csvPath = csvPathInput.value.trim();
@@ -40,6 +54,8 @@ async function loadCSV() {
         if (data.success) {
             correctCount = 0;
             incorrectCount = 0;
+            quizTitle.textContent = '🐦 Bird Quiz - ' + (quizLabel || 'Custom');
+            quizLabel = null;
             setupSection.style.display = 'none';
             quizSection.style.display = 'block';
             menuButton.classList.add('show');
@@ -156,6 +172,7 @@ function resetQuiz() {
     setupSection.style.display = 'block';
     quizSection.style.display = 'none';
     csvPathInput.value = 'ebird_world_year_list.csv';
+    quizTitle.textContent = '🐦 Bird Identification Quiz';
     menuButton.classList.remove('show');
     closeMenu();
 }

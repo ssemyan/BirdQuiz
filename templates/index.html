@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🐦 Bird Identification Quiz</h1>
+            <h1 id="quizTitle">🐦 Bird Identification Quiz</h1>
             <button class="menu-button" id="menuButton" onclick="toggleMenu()">☰</button>
             
             <div class="menu" id="menu">
@@ -18,9 +18,15 @@
         </div>
 
         <div class="setup-section" id="setupSection">
-            <label for="csvPath">CSV File Path:</label>
-            <input type="text" id="csvPath" value="ebird_world_year_list.csv" placeholder="e.g., ebird_world_year_list.csv">
-            <button onclick="loadCSV()">Load Birds</button>
+            <div class="quick-start">
+                <button class="quick-start-button" onclick="loadWashingtonBirds()">Washington Birds</button>
+                <button class="quick-start-button" onclick="loadBackyardBirds()">Common Backyard Birds</button>
+            </div>
+            <div class="custom-csv">
+                <label for="csvPath">CSV File Path:</label>
+                <input type="text" id="csvPath" value="ebird_world_year_list.csv" placeholder="e.g., ebird_world_year_list.csv">
+                <button onclick="loadCSV()">Load Birds</button>
+            </div>
         </div>
 
         <div class="error" id="errorMessage"></div>

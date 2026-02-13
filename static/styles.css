@@ -37,13 +37,38 @@ h1 {
     border-radius: 5px;
 }
 
-.setup-section label {
+.quick-start {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.quick-start-button {
+    background-color: #2196F3;
+    color: white;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.quick-start-button:hover {
+    background-color: #1976D2;
+}
+
+.custom-csv label {
     display: block;
     margin-bottom: 10px;
     font-weight: bold;
 }
 
-.setup-section input[type="text"] {
+.custom-csv input[type="text"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -52,7 +77,7 @@ h1 {
     font-size: 14px;
 }
 
-.setup-section button {
+.setup-section .custom-csv button {
     background-color: #4CAF50;
     color: white;
     padding: 12px 30px;
@@ -63,7 +88,7 @@ h1 {
     width: 100%;
 }
 
-.setup-section button:hover {
+.setup-section .custom-csv button:hover {
     background-color: #45a049;
 }
 
