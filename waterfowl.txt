@@ -1,4 +1,3 @@
-Common Name
 Mallard  
 Gadwall  
 American Wigeon  

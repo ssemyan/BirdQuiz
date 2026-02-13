@@ -23,12 +23,12 @@
                 <button class="quick-start-button" onclick="loadWashingtonBirds()">Washington Birds</button>
                 <button class="quick-start-button" onclick="loadBackyardBirds()">Common Backyard Birds</button>
                 <button class="quick-start-button" onclick="loadWaterfowl()">Waterfowl</button>
-                <button class="quick-start-button custom-button" onclick="showCustomCSV()">Custom</button>
+                <button class="quick-start-button custom-button" onclick="showCustomList()">Custom</button>
             </div>
-            <div class="custom-csv" id="customCsvSection" style="display: none;">
-                <label for="csvData">Paste your list of bird names, one per line:</label>
-                <textarea id="csvData" rows="6" placeholder="American Robin&#10;Bald Eagle&#10;Red-tailed Hawk&#10;..."></textarea>
-                <button onclick="loadCustomCSV()">Load Birds</button>
+            <div class="custom-csv" id="customListSection" style="display: none;">
+                <label for="birdListData">Paste your list of bird names, one per line:</label>
+                <textarea id="birdListData" rows="6" placeholder="American Robin&#10;Bald Eagle&#10;Red-tailed Hawk&#10;..."></textarea>
+                <button onclick="loadCustomList()">Load Birds</button>
             </div>
         </div>
 

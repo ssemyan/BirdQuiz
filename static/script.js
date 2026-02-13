@@ -7,11 +7,11 @@ const setupSection = document.getElementById('setupSection');
 const quizSection = document.getElementById('quizSection');
 const menuButton = document.getElementById('menuButton');
 const errorDiv = document.getElementById('errorMessage');
-const csvDataInput = document.getElementById('csvData');
+const birdListInput = document.getElementById('birdListData');
 const correctCountEl = document.getElementById('correctCount');
 const incorrectCountEl = document.getElementById('incorrectCount');
 const quizTitle = document.getElementById('quizTitle');
-const customCsvSection = document.getElementById('customCsvSection');
+const customListSection = document.getElementById('customListSection');
 
 let correctCount = 0;
 let incorrectCount = 0;
@@ -19,30 +19,30 @@ let currentQuestion = null;
 let answered = false;
 let quizLabel = null;
 
-function showCustomCSV() {
-    customCsvSection.style.display = customCsvSection.style.display === 'none' ? 'block' : 'none';
+function showCustomList() {
+    customListSection.style.display = customListSection.style.display === 'none' ? 'block' : 'none';
 }
 
 function loadWashingtonBirds() {
     quizLabel = 'Washington Birds';
-    loadCSV('wa_birds.csv');
+    loadList('wa_birds.txt');
 }
 
 function loadBackyardBirds() {
     quizLabel = 'Common Backyard Birds';
-    loadCSV('backyard_birds.csv');
+    loadList('backyard_birds.txt');
 }
 
 function loadWaterfowl() {
     quizLabel = 'Waterfowl';
-    loadCSV('waterfowl.csv');
+    loadList('waterfowl.txt');
 }
 
-async function loadCSV(filePath) {
+async function loadList(filePath) {
     showError('');
 
     try {
-        const response = await fetch('/api/load-csv', {
+        const response = await fetch('/api/load-birds', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -55,17 +55,17 @@ async function loadCSV(filePath) {
         if (data.success) {
             startQuiz();
         } else {
-            showError(data.error || 'Failed to load CSV');
+            showError(data.error || 'Failed to load birds');
         }
     } catch (error) {
-        showError('Error loading CSV: ' + error.message);
+        showError('Error loading birds: ' + error.message);
     }
 }
 
-async function loadCustomCSV() {
-    const csvData = csvDataInput.value.trim();
+async function loadCustomList() {
+    const birdData = birdListInput.value.trim();
 
-    if (!csvData) {
+    if (!birdData) {
         showError('Please paste a list of bird names into the text box');
         return;
     }
@@ -74,12 +74,12 @@ async function loadCustomCSV() {
     quizLabel = 'Custom';
 
     try {
-        const response = await fetch('/api/load-csv-data', {
+        const response = await fetch('/api/load-birds', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ bird_names: csvData })
+            body: JSON.stringify({ bird_names: birdData })
         });
 
         const data = await response.json();
@@ -209,8 +209,8 @@ function selectOption(button, option) {
 function resetQuiz() {
     setupSection.style.display = 'block';
     quizSection.style.display = 'none';
-    csvDataInput.value = '';
-    customCsvSection.style.display = 'none';
+    birdListInput.value = '';
+    customListSection.style.display = 'none';
     quizTitle.textContent = '🐦 Bird Quiz';
     menuButton.classList.remove('show');
     closeMenu();

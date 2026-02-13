@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-import csv
 import random
 import os
 from dotenv import load_dotenv
@@ -27,20 +26,21 @@ DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 bird_list = []
 
 
-def load_birds_from_csv(file_path):
-    """Load bird names from CSV file."""
+def load_birds_from_text(text):
+    """Load bird names from plain text, one per line."""
     global bird_list
+    birds = [name.strip() for name in text.splitlines() if name.strip()]
+    bird_list = list(dict.fromkeys(birds))
+    return bird_list if bird_list else None
+
+
+def load_birds_from_file(file_path):
+    """Load bird names from a plain text file, one per line."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            if reader.fieldnames is None or 'Common Name' not in reader.fieldnames:
-                return None
-            birds = [row['Common Name'].strip() for row in reader if row['Common Name'].strip()]
-        # Remove duplicates while preserving order
-        bird_list = list(dict.fromkeys(birds))
-        return bird_list
+            return load_birds_from_text(f.read())
     except Exception as e:
-        print(f"Error loading CSV: {e}")
+        print(f"Error loading file: {e}")
         return None
 
 
@@ -155,49 +155,34 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/api/load-csv', methods=['POST'])
-def load_csv():
-    """Load birds from uploaded or specified CSV file."""
+@app.route('/api/load-birds', methods=['POST'])
+def load_birds():
+    """Load birds from a server file or pasted list of names."""
     data = request.json
-    file_path = data.get('file_path', 'ebird_world_year_list.csv')
-    
-    # Ensure file exists in the current directory
-    if not os.path.exists(file_path):
-        return jsonify({'success': False, 'error': f'File not found: {file_path}'}), 400
-    
-    birds = load_birds_from_csv(file_path)
-    if birds is None:
-        return jsonify({'success': False, 'error': 'CSV must have a "Common Name" column'}), 400
-    
-    return jsonify({'success': True, 'count': len(birds)})
+    file_path = data.get('file_path')
+    bird_names = data.get('bird_names')
 
-
-@app.route('/api/load-csv-data', methods=['POST'])
-def load_csv_data():
-    """Load birds from a pasted list of names, one per line."""
-    data = request.json
-    bird_names = data.get('bird_names', '')
-    
-    if not bird_names.strip():
-        return jsonify({'success': False, 'error': 'No bird names provided'}), 400
-    
-    global bird_list
-    try:
-        birds = [name.strip() for name in bird_names.splitlines() if name.strip()]
-        bird_list = list(dict.fromkeys(birds))
-        if not bird_list:
+    if file_path:
+        if not os.path.exists(file_path):
+            return jsonify({'success': False, 'error': f'File not found: {file_path}'}), 400
+        birds = load_birds_from_file(file_path)
+        if birds is None:
+            return jsonify({'success': False, 'error': 'No bird names found in file'}), 400
+    elif bird_names:
+        birds = load_birds_from_text(bird_names)
+        if birds is None:
             return jsonify({'success': False, 'error': 'No bird names found in the list'}), 400
-        return jsonify({'success': True, 'count': len(bird_list)})
-    except Exception as e:
-        print(f"Error parsing bird list: {e}")
-        return jsonify({'success': False, 'error': 'Failed to parse bird list'}), 400
+    else:
+        return jsonify({'success': False, 'error': 'No file path or bird names provided'}), 400
+
+    return jsonify({'success': True, 'count': len(birds)})
 
 
 @app.route('/api/quiz-question', methods=['GET'])
 def get_quiz_question():
     """Generate a quiz question with random bird and options."""
     if not bird_list:
-        return jsonify({'success': False, 'error': 'No birds loaded. Load a CSV first.'}), 400
+        return jsonify({'success': False, 'error': 'No birds loaded. Load a bird list first.'}), 400
     
     # Pick a random bird
     correct_bird = random.choice(bird_list)
@@ -232,7 +217,8 @@ def get_quiz_question():
 
 if __name__ == '__main__':
     # Load default bird list
-    if os.path.exists('ebird_world_year_list.csv'):
-        load_birds_from_csv('ebird_world_year_list.csv')
+    default_file = 'ebird_world_year_list.csv'
+    if os.path.exists(default_file):
+        load_birds_from_file(default_file)
     
     app.run(debug=True, port=5000)
