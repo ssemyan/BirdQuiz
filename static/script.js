@@ -30,6 +30,12 @@ function loadBackyardBirds() {
     loadCSV();
 }
 
+function loadWaterfowl() {
+    csvPathInput.value = 'waterfowl.csv';
+    quizLabel = 'Waterfowl';
+    loadCSV();
+}
+
 async function loadCSV() {
     const csvPath = csvPathInput.value.trim();
     
@@ -160,7 +166,8 @@ function selectOption(button, option) {
             }
         });
         feedbackEl.className = 'feedback incorrect';
-        feedbackEl.innerHTML = `✗ Incorrect! The correct answer is: ${currentQuestion.correct_answer}`;
+        const wikiUrl = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(currentQuestion.correct_answer.replace(/ /g, '_'));
+        feedbackEl.innerHTML = `✗ Incorrect! The correct answer is: <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer">${currentQuestion.correct_answer}</a>`;
     }
 
     correctCountEl.textContent = correctCount;

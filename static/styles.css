@@ -206,6 +206,16 @@ h1 {
     display: block;
 }
 
+.feedback a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.feedback a:hover {
+    opacity: 0.8;
+}
+
 .next-button {
     background-color: #2196F3;
     color: white;

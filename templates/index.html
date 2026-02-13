@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bird Identification Quiz</title>
+    <title>Bird Quiz</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="quizTitle">🐦 Bird Identification Quiz</h1>
+            <h1 id="quizTitle">🐦 Bird Quiz</h1>
             <button class="menu-button" id="menuButton" onclick="toggleMenu()">☰</button>
             
             <div class="menu" id="menu">
@@ -21,6 +22,7 @@
             <div class="quick-start">
                 <button class="quick-start-button" onclick="loadWashingtonBirds()">Washington Birds</button>
                 <button class="quick-start-button" onclick="loadBackyardBirds()">Common Backyard Birds</button>
+                <button class="quick-start-button" onclick="loadWaterfowl()">Waterfowl</button>
             </div>
             <div class="custom-csv">
                 <label for="csvPath">CSV File Path:</label>
