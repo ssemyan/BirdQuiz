@@ -1,16 +1,16 @@
 # Bird Quiz
 
-A web-based bird identification practice application that tests your ability to identify birds you've seen. The app displays images of birds and presents 4 multiple-choice options (1 correct answer + 3 similar-looking birds), helping you reinforce your bird ID skills.
+A web-based bird identification practice application that tests your ability to identify birds. You can choose from premade lists of birds or upload your own. Once a list is selected, the app displays images of a random bird from the list and then presents 4 options (1 correct answer + 3 similar-looking birds as determined by ChatGPT 4o) to choose the correct name, helping you reinforce your bird ID skills.
 
 ## Features
 
-- **CSV-based bird lists**: Load any CSV file with bird names (just needs a "Common Name" column). This can be downloaded from ebird.org if you use them for your lifelist.
+- **Custom bird lists**: Load list of bird names. This can be generated via an LLM or downloaded from sites like ebird.org
 - **Real bird images**: Fetches actual images from Wikimedia Commons
 - **AI-powered options**: Uses Azure OpenAI GPT-4 to suggest similar-looking birds as wrong answers
 - **Session scoring**: Tracks correct and incorrect answers during your session
-- **Immediate feedback**: Know if you're right or wrong after each guess
+- **Immediate feedback**: Know if you're right or wrong after each guess, and if you are wrong you can go to the Wikipedia page for the bird to study up
 - **Simple UI**: Clean, minimal design focused on learning
-- **Azure AD authentication**: Secure authentication using Azure credentials (no API keys needed)
+- **Azure OpenAI AD authentication**: Secure authentication for Azure OpenAI (no API keys needed)
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ Before running the app, authenticate with your Azure account:
 ```bash
 az login
 ```
-This will open a browser window for you to sign in with your Azure AD credentials.
+This will open a browser window for you to sign in with your Azure AD credentials. The app will now access Azure Open AI as you.
 
 ## Setup Instructions
 
@@ -105,10 +105,9 @@ Open your web browser and navigate to:
 http://localhost:5000
 ```
 
-### 4. Load Your Bird List
-1. Enter the path to your CSV file (default: `ebird_world_year_list.csv`)
-2. Click "Load Birds"
-3. The quiz will start automatically
+### 4. Pick a Bird List
+1. Pick one of the premade lists or enter your own
+2. The quiz will start automatically
 
 ### 5. Answer Questions
 - Look at the bird image
@@ -116,17 +115,18 @@ http://localhost:5000
 - Get immediate feedback (correct or incorrect)
 - Your score updates in real-time
 - Click "Next Question" to continue
+- To load a different list, click the hamburger icon in the upper right and select 'Load Different Birds'
 
 ### 6. Stop the Server
 Press `Ctrl+C` in the terminal to stop the Flask server.
 
 ## How It Works
 
-1. **Load Birds**: App reads your CSV file and extracts all bird names
+1. **Load Birds**: App loads from a premade file or the entered list
 2. **Pick Random Bird**: A random bird is selected for the quiz
 3. **Fetch Image**: Real bird images are fetched from Wikimedia Commons API
 4. **Generate Options**: Azure OpenAI GPT-4 suggests 3 similar-looking birds as wrong answers
-5. **Present Quiz**: Image and 4 options are shown to you
+5. **Present Quiz**: Images and 4 options are shown to you
 6. **Score**: Your answer is checked and score is updated
 7. **Repeat**: Process continues with new random birds
 
@@ -165,12 +165,13 @@ Press `Ctrl+C` in the terminal to stop the Flask server.
 BirdFind/
 ├── app.py                          # Flask backend
 ├── requirements.txt                # Python dependencies
-├── .env.example                    # Environment variables template
+├── .env.example                    # Sample Environment variables
 ├── README.md                       # This file
-├── ebird_world_year_list.csv      # Example bird list
+├── [birdlist].txt                  # premade bird lists
 ├── templates/
-│   └── index.html                 # Frontend (HTML/CSS/JS)
-└── .git/                          # Version control
+│   └── index.html                 # Frontend (HTML)
+└── static/
+    └── *.css, *.js                # Frontend (static files)
 ```
 
 ## API Endpoints
