@@ -7,6 +7,7 @@ const setupSection = document.getElementById('setupSection');
 const quizSection = document.getElementById('quizSection');
 const menuButton = document.getElementById('menuButton');
 const errorDiv = document.getElementById('errorMessage');
+const imageHintEl = document.getElementById('imageHint');
 const birdListInput = document.getElementById('birdListData');
 const correctCountEl = document.getElementById('correctCount');
 const incorrectCountEl = document.getElementById('incorrectCount');
@@ -142,12 +143,14 @@ async function nextQuestion() {
 function displayQuestion(question) {
     // Display images
     imageContainer.innerHTML = '';
+    imageHintEl.style.display = 'none';
     
     if (question.images && question.images.image_urls && question.images.image_urls.length > 0) {
         question.images.image_urls.forEach(imageUrl => {
             const img = document.createElement('img');
             img.src = imageUrl;
             img.alt = question.correct_answer;
+            img.title = 'Click image to enlarge';
             img.onclick = function() {
                 openImageModal(imageUrl);
             };
@@ -159,6 +162,8 @@ function displayQuestion(question) {
         
         if (imageContainer.children.length === 0) {
             imageContainer.innerHTML = '<p class="no-images">Images could not be loaded.</p>';
+        } else {
+            imageHintEl.style.display = 'block';
         }
     } else {
         imageContainer.innerHTML = '<p class="no-images">Images not available.</p>';

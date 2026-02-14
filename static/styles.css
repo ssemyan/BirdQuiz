@@ -10,6 +10,30 @@ body {
     padding: 20px;
 }
 
+.footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.footer-link:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+.footer-icon {
+    width: 14px;
+    height: 14px;
+}
+
 .container {
     width: 80%;
     max-width: 1400px;
@@ -161,6 +185,14 @@ h1 {
     color: #999;
 }
 
+.image-hint {
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    margin-top: -15px;
+    margin-bottom: 25px;
+}
+
 .options {
     margin-bottom: 30px;
     display: grid;
@@ -171,6 +203,17 @@ h1 {
 @media (max-width: 900px) {
     .options {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        width: 96%;
+        padding: 20px;
     }
 }
 
