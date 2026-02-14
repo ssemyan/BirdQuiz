@@ -1,14 +1,14 @@
 # Bird Quiz
 
-A web-based bird identification practice application that tests your ability to identify birds. You can choose from premade lists of birds or upload your own. Once a list is selected, the app displays images of a random bird from the list and then presents 4 options (1 correct answer + 3 similar-looking birds as determined by ChatGPT 4o) to choose the correct name, helping you reinforce your bird ID skills.
+A web-based bird identification practice application that tests your ability to identify birds. You can choose from premade lists of birds or paste your own list. Once a list is selected, the app displays images of a random bird seleted from the list and then presents 4 options (1 correct answer + 3 similar-looking birds as determined by Azure OpenAI GPT-4) and asks you to choose the correct name, helping you reinforce your bird ID skills.
 
 ## Features
 
-- **Custom bird lists**: Load list of bird names. This can be generated via an LLM or downloaded from sites like ebird.org
+- **Custom bird lists**: Load your own list of birds you want to be quized on, one per line using their common name
 - **Real bird images**: Fetches actual images from Wikimedia Commons
 - **AI-powered options**: Uses Azure OpenAI GPT-4 to suggest similar-looking birds as wrong answers
 - **Session scoring**: Tracks correct and incorrect answers during your session
-- **Immediate feedback**: Know if you're right or wrong after each guess, and if you are wrong you can go to the Wikipedia page for the bird to study up
+- **Immediate feedback**: Know if you're right or wrong after each guess, with a link to the bird's Wikipedia page when you miss one
 - **Simple UI**: Clean, minimal design focused on learning
 - **Azure OpenAI AD authentication**: Secure authentication for Azure OpenAI (no API keys needed)
 
@@ -21,7 +21,7 @@ python --version
 ```
 
 ### 2. Azure OpenAI Access
-You need an Azure OpenAI deployment with a GPT-4 model. Get:
+You need an Azure OpenAI deployment with a GPT-4 (or any other capable) model. You will need the following:
 - **Azure OpenAI Endpoint**: `https://your-resource-name.openai.azure.com/`
 - **Deployment Name**: The name of your GPT-4 deployment (e.g., `gpt-4`)
 - **Azure Subscription**: Access to the Azure subscription where the resource is deployed
@@ -41,7 +41,7 @@ This will open a browser window for you to sign in with your Azure AD credential
 
 ### 1. Clone or Download the Project
 ```bash
-cd /home/scottse/source/BirdFind
+git clone https://github.com/ssemyan/BirdQuiz
 ```
 
 ### 2. Create a Python Virtual Environment
@@ -70,16 +70,6 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4
 
 **Note**: No API key is needed! The app uses Azure AD authentication via `az login`.
 
-### 5. Prepare Your Bird CSV File
-The app expects a CSV file with a "Common Name" column. Example format:
-```
-Row #,Common Name,Scientific Name,Count,Location
-1,Cedar Waxwing,Bombycilla cedrorum,4,Magnuson Park
-2,Greater Scaup,Aythya marila,20,Magnuson Park
-3,Red-naped Sapsucker,Sphyrapicus nuchalis,1,Ulistac Natural Area
-```
-
-The default file is `ebird_world_year_list.csv`, but you can use any CSV file with a "Common Name" column.
 
 ## Running the App
 
@@ -106,7 +96,7 @@ http://localhost:5000
 ```
 
 ### 4. Pick a Bird List
-1. Pick one of the premade lists or enter your own
+1. Pick one of the premade lists or click Custom to paste your own list
 2. The quiz will start automatically
 
 ### 5. Answer Questions
@@ -122,7 +112,7 @@ Press `Ctrl+C` in the terminal to stop the Flask server.
 
 ## How It Works
 
-1. **Load Birds**: App loads from a premade file or the entered list
+1. **Load Birds**: App loads from a premade file or a pasted list
 2. **Pick Random Bird**: A random bird is selected for the quiz
 3. **Fetch Image**: Real bird images are fetched from Wikimedia Commons API
 4. **Generate Options**: Azure OpenAI GPT-4 suggests 3 similar-looking birds as wrong answers
@@ -155,9 +145,8 @@ Press `Ctrl+C` in the terminal to stop the Flask server.
 - This is normal for less common bird species
 
 ### "No birds loaded" Error
-- Make sure your CSV file has a "Common Name" column
-- Verify the file path is correct
-- Check that the file isn't empty
+- Verify the list file path is correct
+- Check that the list isn't empty
 
 ## Project Structure
 
@@ -167,10 +156,11 @@ BirdFind/
 ├── requirements.txt                # Python dependencies
 ├── .env.example                    # Sample Environment variables
 ├── README.md                       # This file
-├── [birdlist].txt                  # premade bird lists
+├── [birdlist].txt                  # premade bird lists (one bird per line)
 ├── templates/
 │   └── index.html                 # Frontend (HTML)
 └── static/
+    ├── favicon.svg                # App favicon
     └── *.css, *.js                # Frontend (static files)
 ```
 
@@ -179,9 +169,20 @@ BirdFind/
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/` | GET | Serve the main HTML page |
-| `/api/load-csv` | POST | Load birds from CSV file |
+| `/api/load-birds` | POST | Load birds from a server file or pasted list |
 | `/api/quiz-question` | GET | Get a new quiz question with options |
-| `/api/check-answer` | POST | Check if answer is correct |
+
+Example request bodies for `/api/load-birds`:
+
+Load a premade list file:
+```
+{ "file_path": "wa_birds.txt" }
+```
+
+Load a pasted list:
+```
+{ "bird_names": "Cedar Waxwing\nGreat Egret\nBald Eagle" }
+```
 
 ## Technologies Used
 
@@ -190,28 +191,18 @@ BirdFind/
 - **AI**: Azure OpenAI (GPT-4)
 - **Authentication**: Azure AD (DefaultAzureCredential)
 - **Images**: Wikimedia Commons API
-- **Data**: CSV parsing
+- **Data**: Plain text lists
 
 ## Notes
 
-- Score tracking is per-session only (resets on page refresh or new CSV load)
+- Score tracking is per-session only (resets on page refresh or new list load)
 - The app runs in debug mode by default (development only)
 - For production, use a proper WSGI server (Gunicorn, uWSGI, etc.)
 - Azure OpenAI API calls may incur charges based on your usage
 
-## Future Enhancements
-
-- Persistent score tracking (database)
-- Export score reports
-- Family-based bird filtering
-- Regional bird filtering
-- Multiple image display per bird
-- Difficulty levels
-- Timed challenges
-
 ## License
 
-This project is for educational purposes.
+This project is for educational purposes and covered by the MIT license
 
 ## Support
 
