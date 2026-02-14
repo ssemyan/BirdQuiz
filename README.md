@@ -1,6 +1,6 @@
 # Bird Quiz
 
-A web-based bird identification practice application that tests your ability to identify birds. You can choose from premade lists of birds or paste your own list. Once a list is selected, the app displays images of a random bird seleted from the list and then presents 4 options (1 correct answer + 3 similar-looking birds as determined by Azure OpenAI GPT-4) and asks you to choose the correct name, helping you reinforce your bird ID skills.
+Bird Quiz is a web-based tool that tests your ability to identify birds by sight. You can choose from premade lists of birds or paste in your own. Once a list is selected, images are displayed of a randomly selected bird from the list, and you are given 4 choices (1 correct answer + 3 similar-looking birds as determined by GPT-4). Answers are checked, tallied, and another bird from the list is chosen, helping you reinforce your bird ID skills.
 
 ## Features
 
