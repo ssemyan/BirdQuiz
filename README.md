@@ -200,6 +200,14 @@ Load a pasted list:
 - For production, use a proper WSGI server (Gunicorn, uWSGI, etc.)
 - Azure OpenAI API calls may incur charges based on your usage
 
+## Security
+
+This repository follows security best practices:
+- No API keys or credentials are stored in the code
+- Uses Azure AD authentication (no API keys needed)
+- All sensitive configuration is loaded from environment variables
+- See [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) for ongoing security guidelines
+
 ## License
 
 This project is for educational purposes and covered by the MIT license
