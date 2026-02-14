@@ -128,6 +128,40 @@ Press `Ctrl+C` in the terminal to stop the Flask server.
 | `AZURE_OPENAI_API_VERSION` | No | API version (default: `2024-02-01`) |
 | `AZURE_OPENAI_DEPLOYMENT_NAME` | Yes | Your GPT-4 deployment name |
 
+## Deployment Script (Azure App Service)
+
+The project includes a deployment script at `deploy.sh` that provisions Azure resources (if needed) and deploys the app.
+
+### Requirements
+- Azure CLI installed and authenticated (`az login`)
+- A configured `.env` file (see `.env.example`), including:
+    - `APP_SERVICE_NAME`
+    - `RESOURCE_GROUP`
+    - `APP_SERVICE_PLAN`
+    - `APP_SERVICE_PLAN_SKU`
+    - `AZURE_REGION`
+    - `FOUNDARY_PROJECT_RESOURCE_ID`
+
+### How It Works
+- Creates the App Service plan and Web App if they do not exist
+- Assigns a system-managed identity and grants it the Azure AI role
+- Sets App Service app settings for Azure OpenAI and enables build during deployment
+- Copies app files into a `deploy/` folder and runs `az webapp up` from there
+
+### Usage
+Full setup + deploy:
+```bash
+./deploy.sh
+```
+
+Update-only deploy (skip provisioning/config):
+```bash
+./deploy.sh -update
+```
+
+### Notes
+- The script deploys from a temporary `deploy/` directory. If you need additional files included, update the copy step in `deploy.sh`.
+
 ## Troubleshooting
 
 ### "Resource not found" Error
