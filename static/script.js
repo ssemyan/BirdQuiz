@@ -38,6 +38,11 @@ function loadWaterfowl() {
     loadList('waterfowl.txt');
 }
 
+function loadRaptors() {
+    quizLabel = 'Raptors';
+    loadList('raptors.txt');
+}
+
 async function loadList(filePath) {
     showError('');
 
@@ -97,6 +102,8 @@ async function loadCustomList() {
 function startQuiz() {
     correctCount = 0;
     incorrectCount = 0;
+    correctCountEl.textContent = '0';
+    incorrectCountEl.textContent = '0';
     quizTitle.textContent = '🐦 Bird Quiz - ' + (quizLabel || 'Custom');
     quizLabel = null;
     setupSection.style.display = 'none';
