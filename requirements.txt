@@ -2,6 +2,6 @@ flask==3.0.0
 python-dotenv==1.0.0
 openai==2.20.0
 azure-identity==1.25.2
-requests==2.31.0
-gunicorn==20.1.0
+requests==2.32.4
+gunicorn==22.0.0
 setuptools==80.9.0
