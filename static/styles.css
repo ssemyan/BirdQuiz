@@ -168,6 +168,12 @@ h1 {
     gap: 10px;
 }
 
+@media (max-width: 900px) {
+    .options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 .option-button {
     padding: 15px;
     background-color: #e0e0e0;
